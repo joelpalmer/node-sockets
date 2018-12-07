@@ -10,10 +10,16 @@ if (!filename) {
 net.createServer(connection => {
     // reporting.
     console.log('Subscriber connected');
-    connection.write(`Now watching "${filename}" for changes...\n`);
+    connection.write(JSON.stringify({
+        type: 'watching',
+        file: filename
+    }) + '\n'); //ldj: line-delimited JSON
 
     // watcher setup
-    const watcher = fs.watch(filename, () => connection.write(`File changed: ${new Date()}\n`));
+    const watcher = fs.watch(filename, () => connection.write(JSON.stringify({
+        type: 'changed',
+        timestamp: Date.now()
+    }) + '\n')); //ldj
 
     //cleanup
     connection.on('close', () => {
